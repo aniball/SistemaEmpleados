@@ -18,15 +18,15 @@ Ingresar nuevo empleado
         <tbody>
         {% for empleado in empleados %}
         <tr>
-            <td>{{empleado[0]}}</td>
+            <td>{{empleado.id}}</td>
             <td>
-                <img class="img-thumbnail" width="100" src="uploads/{{ empleado[3] }}" alt="Foto">
+                <img class="img-thumbnail" width="100" src="uploads/{{ empleado.foto }}" alt="Foto">
             </td>
-            <td>{{empleado[1]}}</td>
-            <td>{{empleado[2]}}</td>
+            <td>{{empleado.nombre}}</td>
+            <td>{{empleado.correo}}</td>
             <td>
-                <a class="btn btn-warning" href="/edit/{{empleado[0]}}">Editar</a> |
-                <a class="btn btn-danger" onclick="return confirm('¿Desea borrar al empleado?')" href="/destroy/{{ empleado[0] }}">Eliminar</a>
+                <a class="btn btn-warning" href="/edit/{{ empleado.id }}">Editar</a> |
+                <a class="btn btn-danger" onclick="return confirm('¿Desea borrar al empleado?')" href="/destroy/{{ empleado.id }}">Eliminar</a>
             </td>
         </tr>
         {% endfor %}

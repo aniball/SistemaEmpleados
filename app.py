@@ -3,6 +3,7 @@ from flask import Flask
 from flask import render_template,request,redirect,url_for,flash
 from flask import send_from_directory
 from flaskext.mysql import MySQL
+from pymysql.cursors import DictCursor
 from datetime import datetime #Nos permitirá darle el nombre a la foto
 import os #modulo del SO - permite entrar en carpeta
 
@@ -29,7 +30,7 @@ def uploads(nombreFoto):
 def index():
     sql = "SELECT * FROM `Sistema`.`empleados`;"
     conn = mysql.connect()
-    cursor = conn.cursor()
+    cursor = conn.cursor(cursor=DictCursor)
     cursor.execute(sql)
     empleados=cursor.fetchall()
     print(empleados)
@@ -39,10 +40,15 @@ def index():
 @app.route('/destroy/<int:id>')
 def destroy(id):
     conn = mysql.connect()
-    cursor = conn.cursor()
+    cursor = conn.cursor(cursor=DictCursor)
     cursor.execute("SELECT foto FROM `Sistema`.`empleados` WHERE id=%s",id)
     fila= cursor.fetchall()
-    os.remove(os.path.join(app.config['CARPETA'], fila[0][0]))
+ 
+    try:
+        os.remove(os.path.join(app.config['CARPETA'], fila[0][0]))
+    except:
+        pass
+
     cursor.execute("DELETE FROM `Sistema`.`empleados` WHERE id=%s", (id))
     conn.commit()
     return redirect('/')
@@ -50,7 +56,7 @@ def destroy(id):
 @app.route('/edit/<int:id>')
 def edit(id):
     conn = mysql.connect()
-    cursor = conn.cursor()
+    cursor = conn.cursor(cursor=DictCursor)
     cursor.execute("SELECT * FROM `Sistema`.`empleados` WHERE id=%s", (id))
     empleados=cursor.fetchall()
     conn.commit()
@@ -67,7 +73,7 @@ def update():
     datos=(_nombre,_correo,id)
 
     conn = mysql.connect()
-    cursor = conn.cursor()
+    cursor = conn.cursor(cursor=DictCursor)
     now= datetime.now()
     tiempo= now.strftime("%Y%H%M%S")   
 
@@ -77,7 +83,12 @@ def update():
         print(nuevoNombreFoto)
         cursor.execute("SELECT foto FROM `Sistema`.`empleados` WHERE id=%s", id)
         fila= cursor.fetchall()
-        os.remove(os.path.join(app.config['CARPETA'], fila[0][0]))
+
+        try:
+            os.remove(os.path.join(app.config['CARPETA'], fila[0][0]))
+        except:
+            pass
+                
         cursor.execute("UPDATE `Sistema`.`empleados` SET foto=%s WHERE id=%s;", (nuevoNombreFoto, id))
         conn.commit()
 
@@ -106,7 +117,7 @@ def storage():
     sql = "INSERT INTO `Sistema`.`empleados` (`id`, `nombre`, `correo`, `foto`) VALUES (NULL, %s, %s, %s);"
     datos=(_nombre, _correo,nuevoNombreFoto)
     conn = mysql.connect()
-    cursor = conn.cursor()
+    cursor = conn.cursor(cursor=DictCursor)
     cursor.execute(sql,datos)
     conn.commit()
     return redirect('/')  
